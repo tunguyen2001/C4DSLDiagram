@@ -5,24 +5,24 @@ workspace {
         LinkedFBUser = person "Linked FB User" "Use instagram with facebook account"
 
         enterprise "IG System" {            
-            // mainframeIGSystem = softwareSystem "Mainframe Instagram System" "Stores all of the core Instagram information about users, accounts, activities."    
-            limitedFunctionalFB = softwareSystem "Limited functional FB" "some functions to share and interact between the two systems" "limitedFunctionalFB"
+            Facebook = softwareSystem "Facebook" "some functions to share and interact between the two systems" "Facebook"
             
             InstagramSystem = softwareSystem "Instagram System" "Allow user to view infomation about their Instagram accounts, activities interact posts and make interact with peoples" {
                 webApplication = container "Web Application" "Delivers the static content and the Internet Instagram single page application." "Dotnet core and 'Repoitory Pattern'" "WebBrowser"
                 mobileApp = container "Mobile App" "Provides a limited subset of the Internet Instagram functionality to customers via their mobile device." "Reactjs" "MobileApp"
-                singlePageApplication = container "Single-Page Application" "Provides all of the internet instagram functionality and implementation that load only a single web browser" "JavaScript and Reactjs"
+                singlePageApplication = container "Single-Page Application" "Provides all of the internet instagram functionality and implementation that load only a single web browser" "JavaScript and Reactjs" "singlePageApplication"
                 database = container "Database" "Stores user registation infomation, access log, etc." "Sql server" "Database"
 
-                apiApplication = container "API Application" "Provides application infomation and functionality via a JSON/HTTPS API" "Dotnet core and 'Repository Pattern'" {
+                apiApplication = container "API Application" "Provides application infomation and functionality via a JSON/HTTPS API" "Dotnet core and 'Repository Pattern'" "apiApplication" {
                     controller = component "Controller" "directional, Provides an api interface, allowing users to use system functionality" "Dotnet core controller"
                     service = component "Service" "connection between controller and repository, operations do not interact with database" "Dotnet Core - Framework entity"
-                    baseRepository = component "Base Repository" "base layer with the method and functions used general" "Repository Pattern"
+                    baseRepository = component "Base Repository" "base class, interface with the method and functions used general" "Repository Pattern"
                     repository = component "Repository" "Direct interaction with the database, CRUD" "Framework Entity(LinQ) - 'repository pattern'"
-                    entitys = component "Entitys" "Provider info entity, direct relationship with database" "framework Entity"
+                    entity = component "Entity" "Provider info entity, direct relationship with database" "framework Entity"
                     authorizitionPosts = component "Authorizition Posts" "Post permissions, functions for post owners and limited to followers/viewers" "Dotnet core - Json Web Token"
                     authorizitionProfile = component "Authorizition Profile" "Assign user permissions to profile, public or private" "Dotnet core - Json web token" 
-                
+                    facebookConnector = component "Facebook Connector" "Request - check authentication, approve permission and accept token" "Dotnet Core - JS/Json"
+
                 }
                 
             }
@@ -31,9 +31,8 @@ workspace {
         # relationships between person and software systems
         InstagramUser -> InstagramSystem "Uses"
         LinkedFBUser -> InstagramSystem "Uses"
-        InstagramSystem -> limitedFunctionalFB "share and interact"
-        // InstagramSystem -> mainframeIGSystem "Gets account information from, and make activities using"
-
+        InstagramSystem -> Facebook "share and interact"
+        
         
         # realationships to/from containers 
         InstagramUser -> webApplication "Visits instagram.com using" "HTTPS"
@@ -48,25 +47,25 @@ workspace {
         singlePageApplication -> apiApplication "Makes API calls to" "JSON/HTTPS"
         webApplication -> singlePageApplication "Deliver to the user web browser"
         mobileApp -> apiApplication "Makes API calls to" "JSON/HTTPS"
-        // apiApplication -> mainframeIGSystem "Makes API calls to" "XML/HTTPS"
-        apiApplication -> limitedFunctionalFB "Access token and Call to HTTPs to share stories"
+        apiApplication -> Facebook "Access token and Call to HTTPs to share stories"
 
 
         # relationships of component - API Application
-        singlePageApplication -> controller ""
-        mobileApp -> controller ""
-        controller -> service ""
-        service -> repository ""
-        service -> limitedFunctionalFB ""
-        baseRepository -> repository ""
-        entitys -> repository ""
-        repository -> database ""
-        entitys -> database ""
-        authorizitionPosts -> controller ""
-        authorizitionProfile -> controller ""
-        authorizitionPosts -> database ""
-        authorizitionProfile -> database ""
-
+        singlePageApplication -> controller "Make API call to" "Json/HTTPs"
+        mobileApp -> controller "Make API call to" "Json/HTTPs"
+        controller -> service "Uses"
+        service -> repository "Uses"
+        service -> facebookConnector "Uses"
+        facebookConnector -> Facebook "Share information stories and other to" "HTTPs"
+        baseRepository -> repository "Extends"
+        repository -> entity "Uses"
+        repository -> database "Read from and write to" "Framwork Entity"
+        entity -> database "Mapping" "Framework Entity"
+        controller -> authorizitionPosts "Uses"
+        controller -> authorizitionProfile "Uses"
+        authorizitionPosts -> entity "Uses"
+        authorizitionProfile -> entity "Uses"
+        
     }
     views {
         systemContext InstagramSystem "IGSystemContext" {
@@ -86,6 +85,7 @@ workspace {
         component apiApplication "ComponentApiApplication" {
             include *
             animation {
+
             }
             autoLayout
         }
@@ -100,15 +100,23 @@ workspace {
                 background #08427b
                 color #ffffff
             }
-            element "limitedFunctionalFB" {
-                background #1168bd
+            element "Facebook" {
+                background #2caff5
                 color #ffffff
             }
             element "MobileApp" {
                 shape MobileDevicePortrait
+                background #0ed7e6
             }
             element "WebBrowser" {
                 shape WebBrowser
+                background #0ed7e6
+            }
+            element "singlePageApplication" {
+                background #0ed7e6
+            }
+            element "apiApplication" {
+                background #0ed7e6 
             }
             element "Database" {
                 shape Cylinder
